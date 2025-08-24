@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choti URL</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#1e40af',
+                        success: '#10b981',
+                        error: '#ef4444',
+                        warning: '#f59e0b'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-6xl mx-auto px-4 py-6">
+            <h1 class="text-3xl font-bold text-gray-900">Choti URL</h1>
+            <p class="text-gray-600 mt-2">Transform long URLs into short, shareable links</p>
+        </div>
+    </header>
+
+    <!-- Added toast container for notifications -->
+    <div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+    <main class="max-w-6xl mx-auto px-4 py-8">
+        <!-- URL Shortening Form -->
+        <section class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-6">Create Short URL</h2>
+            
+            <form id="urlForm" class="space-y-4">
+                <div>
+                    <label for="longUrl" class="block text-sm font-medium text-gray-700 mb-2">
+                        Long URL *
+                    </label>
+                    <input 
+                        type="url" 
+                        id="longUrl" 
+                        name="longUrl" 
+                        required
+                        placeholder="https://example.com/very/long/url/path"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
+                    >
+                </div>
+                
+                <div>
+                    <label for="customShortUrl" class="block text-sm font-medium text-gray-700 mb-2">
+                        Custom Short URL (Optional)
+                    </label>
+                    <div class="flex items-center">
+                        <span class="bg-gray-100 px-3 py-3 border border-r-0 border-gray-300 rounded-l-lg text-gray-600">
+                            choti.
+                        </span>
+                        <input 
+                            type="text" 
+                            id="customShortUrl" 
+                            name="customShortUrl"
+                            placeholder="mycustomurl"
+                            class="flex-1 px-4 py-3 border border-gray-300 rounded-r-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
+                        >
+                    </div>
+                    <p class="text-sm text-gray-500 mt-1">Leave empty for auto-generated short URL</p>
+                </div>
+                
+                <button 
+                    type="submit" 
+                    class="w-full bg-primary hover:bg-secondary text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200"
+                >
+                    Create Short URL
+                </button>
+            </form>
+
+            <!-- Result Display -->
+            <div id="resultArea" class="mt-6 hidden">
+                <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <h3 class="text-lg font-semibold text-green-800 mb-3">Short URL Created!</h3>
+                    <div class="flex items-center gap-3 mb-3">
+                        <input 
+                            type="text" 
+                            id="shortUrlResult" 
+                            readonly 
+                            class="flex-1 px-3 py-2 bg-white border border-green-300 rounded-lg text-green-800 font-mono"
+                        >
+                        <button 
+                            id="copyBtn" 
+                            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
+                        >
+                            Copy
+                        </button>
+                    </div>
+                    <div id="urlDetails" class="text-sm text-green-700 space-y-1"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Search Section -->
+        <section class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-6">Search URLs</h2>
+            
+            <div class="grid md:grid-cols-3 gap-4 mb-4">
+                <div>
+                    <label for="searchById" class="block text-sm font-medium text-gray-700 mb-2">Search by ID</label>
+                    <div class="flex gap-2">
+                        <input 
+                            type="number" 
+                            id="searchById" 
+                            placeholder="Enter ID"
+                            class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                        >
+                        <button 
+                            onclick="searchById()" 
+                            class="bg-primary hover:bg-secondary text-white px-4 py-2 rounded-lg transition-colors"
+                        >
+                            Search
+                        </button>
+                    </div>
+                </div>
+                
+                <div>
+                    <label for="searchByShort" class="block text-sm font-medium text-gray-700 mb-2">Search by Short URL</label>
+                    <div class="flex gap-2">
+                        <input 
+                            type="text" 
+                            id="searchByShort" 
+                            placeholder="Enter short URL"
+                            class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                        >
+                        <button 
+                            onclick="searchByShortUrl()" 
+                            class="bg-primary hover:bg-secondary text-white px-4 py-2 rounded-lg transition-colors"
+                        >
+                            Search
+                        </button>
+                    </div>
+                </div>
+                
+                <div>
+                    <label for="searchByLong" class="block text-sm font-medium text-gray-700 mb-2">Search by Long URL</label>
+                    <div class="flex gap-2">
+                        <input 
+                            type="url" 
+                            id="searchByLong" 
+                            placeholder="Enter long URL"
+                            class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                        >
+                        <button 
+                            onclick="searchByLongUrl()" 
+                            class="bg-primary hover:bg-secondary text-white px-4 py-2 rounded-lg transition-colors"
+                        >
+                            Search
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="searchResult" class="hidden mt-4"></div>
+        </section>
+
+        <!-- All URLs Section -->
+        <section class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-semibold text-gray-800">All URLs</h2>
+                <button 
+                    id="showAllBtn" 
+                    onclick="showAllUrls()" 
+                    class="bg-primary hover:bg-secondary text-white px-6 py-2 rounded-lg transition-colors"
+                >
+                    Show All Links
+                </button>
+            </div>
+            
+            <div id="allUrlsContainer" class="hidden">
+                <div id="urlStats" class="mb-4 p-4 bg-gray-50 rounded-lg"></div>
+                <div id="allUrlsList"></div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-lg p-6 flex items-center gap-3">
+            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+            <span class="text-gray-700">Loading...</span>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:9191';
+        
+        // Show/Hide loading overlay
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+        }
+        
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.add('hidden');
+        }
+        
+        const ERROR_MESSAGES = {
+            'Mapping not found for the given ID.': 'No URL found with that ID',
+            'URL not found': 'No URL found',
+            'Custom URL already taken': 'This custom URL is already in use',
+            'Invalid URL format': 'Please enter a valid URL',
+            'Network error': 'Unable to connect to server'
+        };
+        
+        function showToast(message, type = 'info', duration = 5000) {
+            const toastContainer = document.getElementById('toastContainer');
+            
+            // Map backend messages to user-friendly ones
+            const friendlyMessage = ERROR_MESSAGES[message] || message;
+            
+            const colors = {
+                success: 'bg-green-50 border-green-200 text-green-800',
+                error: 'bg-red-50 border-red-200 text-red-800',
+                warning: 'bg-yellow-50 border-yellow-200 text-yellow-800',
+                info: 'bg-blue-50 border-blue-200 text-blue-800'
+            };
+            
+            const toast = document.createElement('div');
+            toast.className = `border rounded-lg p-4 shadow-lg max-w-sm transform transition-all duration-300 ease-in-out translate-x-full opacity-0 ${colors[type]}`;
+            toast.innerHTML = `
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                        <p class="text-sm font-medium">${friendlyMessage}</p>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" class="ml-3 text-gray-400 hover:text-gray-600">
+                        <span class="sr-only">Close</span>
+                        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div>
+            `;
+            
+            toastContainer.appendChild(toast);
+            
+            // Animate in
+            setTimeout(() => {
+                toast.classList.remove('translate-x-full', 'opacity-0');
+            }, 100);
+            
+            // Auto-remove after duration
+            setTimeout(() => {
+                toast.classList.add('translate-x-full', 'opacity-0');
+                setTimeout(() => {
+                    if (toast.parentElement) {
+                        toast.remove();
+                    }
+                }, 300);
+            }, duration);
+        }
+        
+        function showMessage(message, type = 'info') {
+            showToast(message, type);
+        }
+        
+        // Format date for display
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+        
+        // Create URL card HTML
+        function createUrlCard(url) {
+            const creationDate = formatDate(url.creationDate);
+            const expirationDate = formatDate(url.expirationDate);
+            const isExpired = new Date(url.expirationDate) < new Date();
+            
+            return `
+                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow ${isExpired ? 'bg-red-50 border-red-200' : ''}">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-sm font-medium text-gray-500">ID: ${url.id}</span>
+                                ${isExpired ? '<span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">Expired</span>' : '<span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Active</span>'}
+                            </div>
+                            <div class="mb-2">
+                                <label class="text-sm font-medium text-gray-700">Short URL:</label>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <a href="http://localhost:9191/${url.shortUrl}" target="_blank" 
+                                       class="text-primary hover:text-secondary font-mono text-sm break-all">
+                                        ${url.shortUrl}
+                                    </a>
+                                    <button onclick="copyToClipboard('http://localhost:9191/${url.shortUrl}')" 
+                                            class="text-gray-500 hover:text-gray-700 text-xs">
+                                        📋
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="mb-2">
+                                <label class="text-sm font-medium text-gray-700">Long URL:</label>
+                                <a href="${url.longUrl}" target="_blank" 
+                                   class="text-gray-600 hover:text-gray-800 text-sm break-all block mt-1">
+                                    ${url.longUrl}
+                                </a>
+                            </div>
+                        </div>
+                        <button 
+                            onclick="deleteUrl(${url.id})" 
+                            class="ml-4 bg-gray-100 hover:bg-red-100 text-gray-600 hover:text-red-600 px-3 py-1 rounded-lg text-sm font-medium transition-colors duration-200 border border-gray-200 hover:border-red-200"
+                            title="Delete URL"
+                        >
+                            Delete
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600 pt-3 border-t border-gray-200">
+                        <div>
+                            <span class="font-medium">Clicks:</span>
+                            <span class="ml-1">${url.clicks}</span>
+                        </div>
+                        <div>
+                            <span class="font-medium">Created:</span>
+                            <span class="ml-1">${creationDate}</span>
+                        </div>
+                        <div>
+                            <span class="font-medium">Expires:</span>
+                            <span class="ml-1">${expirationDate}</span>
+                        </div>
+                        <div>
+                            <span class="font-medium">Status:</span>
+                            <span class="ml-1 ${isExpired ? 'text-red-600' : 'text-green-600'}">${isExpired ? 'Expired' : 'Active'}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Copy to clipboard function
+        async function copyToClipboard(text) {
+            try {
+                await navigator.clipboard.writeText(text);
+                showMessage('Copied to clipboard!', 'success');
+            } catch (err) {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showMessage('Copied to clipboard!', 'success');
+            }
+        }
+        
+        // Form submission handler
+        document.getElementById('urlForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const longUrl = document.getElementById('longUrl').value;
+            const customShortUrl = document.getElementById('customShortUrl').value;
+            
+            showLoading();
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/url/create`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        longUrl: longUrl,
+                        customShortUrl: customShortUrl || null
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Show success result
+                    document.getElementById('shortUrlResult').value = `http://localhost:9191/${data.shortUrl}`;
+                    document.getElementById('urlDetails').innerHTML = `
+                        <div><strong>ID:</strong> ${data.id}</div>
+                        <div><strong>Created:</strong> ${formatDate(data.creationDate)}</div>
+                        <div><strong>Expires:</strong> ${formatDate(data.expirationDate)}</div>
+                        <div><strong>Clicks:</strong> ${data.clicks}</div>
+                    `;
+                    document.getElementById('resultArea').classList.remove('hidden');
+                    
+                    // Clear form
+                    document.getElementById('urlForm').reset();
+                } else {
+                    showMessage(data.message || 'Error creating short URL', 'error');
+                }
+            } catch (error) {
+                showMessage('Unable to connect to server. Please check if the backend is running.', 'error');
+            }
+            
+            hideLoading();
+        });
+        
+        // Copy button handler
+        document.getElementById('copyBtn').addEventListener('click', () => {
+            const shortUrl = document.getElementById('shortUrlResult').value;
+            copyToClipboard(shortUrl);
+        });
+        
+        // Search by ID
+        async function searchById() {
+            const id = document.getElementById('searchById').value;
+            if (!id) {
+                showMessage('Please enter an ID to search', 'warning');
+                return;
+            }
+            
+            showLoading();
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/url/${id}`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    displaySearchResult(data);
+                } else {
+                    showMessage(data.message || 'No URL found with that ID', 'error');
+                    document.getElementById('searchResult').classList.add('hidden');
+                }
+            } catch (error) {
+                showMessage('Unable to connect to server', 'error');
+            }
+            
+            hideLoading();
+        }
+        
+        // Search by Short URL
+        async function searchByShortUrl() {
+            const shortUrl = document.getElementById('searchByShort').value;
+            if (!shortUrl) {
+                showMessage('Please enter a short URL to search', 'warning');
+                return;
+            }
+            
+            showLoading();
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/url/short/${encodeURIComponent(shortUrl)}`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    displaySearchResult(data);
+                } else {
+                    showMessage(data.message || 'No URL found with that short URL', 'error');
+                    document.getElementById('searchResult').classList.add('hidden');
+                }
+            } catch (error) {
+                showMessage('Unable to connect to server', 'error');
+            }
+            
+            hideLoading();
+        }
+        
+        // Search by Long URL
+        async function searchByLongUrl() {
+            const longUrl = document.getElementById('searchByLong').value;
+            if (!longUrl) {
+                showMessage('Please enter a long URL to search', 'warning');
+                return;
+            }
+            
+            showLoading();
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/url/long`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        longUrl: longUrl
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    displaySearchResult(data);
+                } else {
+                    showMessage(data.message || 'No URL found with that long URL', 'error');
+                    document.getElementById('searchResult').classList.add('hidden');
+                }
+            } catch (error) {
+                showMessage('Unable to connect to server', 'error');
+            }
+            
+            hideLoading();
+        }
+        
+        // Display search result
+        function displaySearchResult(url) {
+            const searchResult = document.getElementById('searchResult');
+            searchResult.innerHTML = `
+                <h3 class="text-lg font-semibold text-gray-800 mb-3">Search Result</h3>
+                ${createUrlCard(url)}
+            `;
+            searchResult.classList.remove('hidden');
+        }
+        
+        // Show all URLs
+        async function showAllUrls() {
+            showLoading();
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/url/all`);
+                
+                if (response.ok) {
+                    const urls = await response.json();
+                    displayAllUrls(urls);
+                } else if (response.status === 204) {
+                    // No content
+                    document.getElementById('allUrlsContainer').innerHTML = `
+                        <div class="text-center py-8 text-gray-500">
+                            <p class="text-lg">No URLs found</p>
+                            <p class="text-sm">Create your first short URL above!</p>
+                        </div>
+                    `;
+                    document.getElementById('allUrlsContainer').classList.remove('hidden');
+                } else {
+                    showMessage('Unable to load URLs', 'error');
+                }
+            } catch (error) {
+                showMessage('Unable to connect to server', 'error');
+            }
+            
+            hideLoading();
+        }
+        
+        // Display all URLs
+        function displayAllUrls(urls) {
+            const container = document.getElementById('allUrlsContainer');
+            const statContainer = document.getElementById('urlStats');
+            const listContainer = document.getElementById('allUrlsList');
+            
+            // Calculate statistics
+            const totalUrls = urls.length;
+            const totalClicks = urls.reduce((sum, url) => sum + url.clicks, 0);
+            const activeUrls = urls.filter(url => new Date(url.expirationDate) >= new Date()).length;
+            const expiredUrls = totalUrls - activeUrls;
+            
+            // Display statistics
+            statContainer.innerHTML = `
+                <h3 class="text-lg font-semibold text-gray-800 mb-3">Statistics</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                    <div class="bg-white rounded-lg p-4 border">
+                        <div class="text-2xl font-bold text-primary">${totalUrls}</div>
+                        <div class="text-sm text-gray-600">Total URLs</div>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 border">
+                        <div class="text-2xl font-bold text-success">${activeUrls}</div>
+                        <div class="text-sm text-gray-600">Active URLs</div>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 border">
+                        <div class="text-2xl font-bold text-error">${expiredUrls}</div>
+                        <div class="text-sm text-gray-600">Expired URLs</div>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 border">
+                        <div class="text-2xl font-bold text-warning">${totalClicks}</div>
+                        <div class="text-sm text-gray-600">Total Clicks</div>
+                    </div>
+                </div>
+            `;
+            
+            // Display URL list
+            if (urls.length > 0) {
+                listContainer.innerHTML = `
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">All URLs (${totalUrls})</h3>
+                    <div class="space-y-4">
+                        ${urls.map(url => createUrlCard(url)).join('')}
+                    </div>
+                `;
+            } else {
+                listContainer.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <p class="text-lg">No URLs found</p>
+                        <p class="text-sm">Create your first short URL above!</p>
+                    </div>
+                `;
+            }
+            
+            container.classList.remove('hidden');
+        }
+        
+        // Clear search inputs when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#searchResult') && !e.target.closest('button')) {
+                // Optional: Clear search results when clicking elsewhere
+            }
+        });
+
+        // Delete URL function
+        async function deleteUrl(id) {
+            // Show confirmation dialog
+            if (!confirm('Are you sure you want to delete this URL? This action cannot be undone.')) {
+                return;
+            }
+            
+            showLoading();
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/url/delete/${id}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.status === 204) {
+                    // Success - URL deleted
+                    showMessage('URL deleted successfully!', 'success');
+                    
+                    // Refresh the all URLs list if it's currently displayed
+                    const allUrlsContainer = document.getElementById('allUrlsContainer');
+                    if (!allUrlsContainer.classList.contains('hidden')) {
+                        showAllUrls();
+                    }
+                    
+                    // Clear search results if they contain the deleted URL
+                    const searchResult = document.getElementById('searchResult');
+                    if (!searchResult.classList.contains('hidden')) {
+                        searchResult.classList.add('hidden');
+                    }
+                    
+                } else if (response.status === 404) {
+                    showMessage('URL not found. It may have already been deleted.', 'error');
+                } else {
+                    const data = await response.json();
+                    showMessage(data.message || 'Unable to delete URL', 'error');
+                }
+            } catch (error) {
+                showMessage('Unable to connect to server', 'error');
+            }
+            
+            hideLoading();
+        }
+    </script>
+</body>
+</html>

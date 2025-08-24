@@ -86,4 +86,15 @@ public class UrlShortnerServiceImpl implements UrlShortnerService{
 		urlRepo.delete(curr);
 		return true;
 	}
+	
+	@Override
+	@Transactional
+	public UrlMapping getAndIncrementClicks(String shortUrl) {
+	    UrlMapping mapping = urlRepo.findByShortUrl(shortUrl).orElse(null);
+	    if (mapping != null) {
+	        mapping.setClicks(mapping.getClicks() + 1);
+	        return mapping;
+	    }
+	    return null;
+	}
 }

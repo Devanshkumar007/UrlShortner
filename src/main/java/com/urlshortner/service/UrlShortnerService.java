@@ -10,5 +10,6 @@ public interface UrlShortnerService {
 	UrlMapping findByLongUrl(String longUrl);
 	List<UrlMapping> listall();
 	Boolean deleteUrl(int id);
+	UrlMapping getAndIncrementClicks(String shortUrl);
 
 }

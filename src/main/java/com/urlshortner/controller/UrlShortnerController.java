@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler; 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -118,4 +119,13 @@ public class UrlShortnerController {
     	log.info("No URL mappings found.");
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+	
+	@DeleteMapping("/delete/{id}")
+	public ResponseEntity<Void> deleteUrl(@PathVariable int id){
+		if(urlService.deleteUrl(id)) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+	}
+	
 }

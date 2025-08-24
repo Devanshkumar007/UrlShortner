@@ -2,9 +2,13 @@
 package com.urlshortner.service;
 
 import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import com.urlshortner.dao.UrlRepository;
 import com.urlshortner.model.UrlMapping;
 import urlshortner.exceptions.CustomUrlTakenException;
@@ -15,6 +19,7 @@ public class UrlShortnerServiceImpl implements UrlShortnerService{
 
 	@Autowired
 	UrlRepository urlRepo;
+	private static final Logger log = LoggerFactory.getLogger(UrlShortnerServiceImpl.class);
 	
 	public String shorturl(String longUrl) {
 		int first = longUrl.indexOf(".");
@@ -90,9 +95,12 @@ public class UrlShortnerServiceImpl implements UrlShortnerService{
 	@Override
 	@Transactional
 	public UrlMapping getAndIncrementClicks(String shortUrl) {
-	    UrlMapping mapping = urlRepo.findByShortUrl(shortUrl).orElse(null);
+	    log.debug("Imcrement Function is called");
+		UrlMapping mapping = urlRepo.findByShortUrl(shortUrl).orElse(null);
 	    if (mapping != null) {
 	        mapping.setClicks(mapping.getClicks() + 1);
+	        log.debug("Increment done");
+	        urlRepo.saveAndFlush(mapping);
 	        return mapping;
 	    }
 	    return null;

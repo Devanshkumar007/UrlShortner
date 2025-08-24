@@ -31,17 +31,17 @@ public class RedirectController {
      * @param shortCode The short code (e.g., "choti.GitHubDevansh").
      * @return a RedirectView to the original long URL.
      */
-    @GetMapping("/{shortCode}")
+    @GetMapping("/{shortCode:.+}")
     public RedirectView redirectToLongUrl(@PathVariable String shortCode) {
         log.debug("Attempting to redirect for short code: {}", shortCode);
-        
+        log.debug("Incoming redirect request for shortCode: {}", shortCode);
         // The service needs the full short URL to find it in the database.
         String fullShortUrl = shortCode; 
-        
+        UrlMapping mapping=null;
         String longUrl = null;
         try {
             // Find the URL mapping in the database.
-            UrlMapping mapping = urlService.getAndIncrementClicks(fullShortUrl);
+            mapping = urlService.getAndIncrementClicks(fullShortUrl);
             if (mapping != null) {
                 longUrl = mapping.getLongUrl();
             }
@@ -51,11 +51,14 @@ public class RedirectController {
 
         if (longUrl != null) {
             log.info("Redirecting short code {} to long URL: {}", shortCode, longUrl);
+            log.info("Found mapping → shortCode: {}, longUrl: {}, clicks: {}",
+                    shortCode, mapping.getLongUrl(), mapping.getClicks());
             RedirectView redirectView = new RedirectView(longUrl);
-            redirectView.setStatusCode(HttpStatus.MOVED_PERMANENTLY);
+            redirectView.setStatusCode(HttpStatus.FOUND);
             return redirectView;
         } else {
             log.warn("Short URL not found: {}", shortCode);
+            log.warn("No mapping found in DB for shortCode: {}", shortCode);
             // Redirect to a 404 page if the URL is not found.
             RedirectView redirectView = new RedirectView("/error");
             redirectView.setStatusCode(HttpStatus.NOT_FOUND);

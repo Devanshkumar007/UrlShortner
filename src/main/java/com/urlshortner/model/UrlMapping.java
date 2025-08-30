@@ -21,6 +21,7 @@ public class UrlMapping {
 	Date creationDate;
 	Date expirationDate;
 	int clicks;
+	private boolean status = true ;
 	
 	public UrlMapping() {
 		super();
@@ -28,7 +29,8 @@ public class UrlMapping {
 		this.creationDate = Date.valueOf(LocalDate.now());
 		this.expirationDate = Date.valueOf(LocalDate.now().plusDays(10));
 		this.clicks = 0;
-	}
+		this.status= true ;	
+		}
 	
 	public UrlMapping(int id, String longUrl, String shortUrl) {
 		super();
@@ -36,6 +38,14 @@ public class UrlMapping {
 		this.longUrl = longUrl;
 		this.shortUrl = shortUrl;
 	}
+	public boolean isStatus() {
+		return status;
+	}
+
+	public void setStatus(boolean status) {
+		this.status = status;
+	}
+
 	public int getId() {
 		return id;
 	}
@@ -72,11 +82,14 @@ public class UrlMapping {
 	public void setClicks(int clicks) {
 		this.clicks = clicks;
 	}
+
 	@Override
 	public String toString() {
 		return "UrlMapping [id=" + id + ", longUrl=" + longUrl + ", shortUrl=" + shortUrl + ", creationDate="
-				+ creationDate + ", expirationDate=" + expirationDate + ", clicks=" + clicks + "]";
+				+ creationDate + ", expirationDate=" + expirationDate + ", clicks=" + clicks + ", status=" + status
+				+ "]";
 	}
+	
 	
 	
 	

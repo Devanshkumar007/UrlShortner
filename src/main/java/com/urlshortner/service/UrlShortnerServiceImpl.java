@@ -1,6 +1,8 @@
 
 package com.urlshortner.service;
 
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -95,12 +97,14 @@ public class UrlShortnerServiceImpl implements UrlShortnerService{
 	@Override
 	@Transactional
 	public UrlMapping getAndIncrementClicks(String shortUrl) {
-	    log.debug("Imcrement Function is called");
-		UrlMapping mapping = urlRepo.findByShortUrl(shortUrl).orElse(null);
+	    UrlMapping mapping = urlRepo.findByShortUrl(shortUrl).orElse(null);
 	    if (mapping != null) {
+	        if (mapping.getExpirationDate().before(Date.valueOf(LocalDate.now()))) {
+	            mapping.setStatus(false);
+	            urlRepo.save(mapping);
+	        }
 	        mapping.setClicks(mapping.getClicks() + 1);
-	        log.debug("Increment done");
-	        urlRepo.saveAndFlush(mapping);
+	        urlRepo.save(mapping);
 	        return mapping;
 	    }
 	    return null;

@@ -14,7 +14,7 @@ public interface UrlRepository extends JpaRepository<UrlMapping, Integer> {
     // Spring Data JPA automatically provides CRUD operations (create, read, update, delete)
     // You can add custom query methods here if needed, e.g.:
     	
-	@Query("SELECT u FROM UrlMapping u WHERE u.shortUrl = :shortUrl")
+	@Query("SELECT u FROM UrlMapping u WHERE u.shortUrl = :shortUrl AND u.status = true")
 	Optional<UrlMapping> findByShortUrl(String shortUrl);
      
     @Query("SELECT u FROM UrlMapping u WHERE u.longUrl = :longUrl")
